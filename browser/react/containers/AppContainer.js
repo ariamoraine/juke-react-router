@@ -23,7 +23,8 @@ export default class AppContainer extends Component {
     this.prev = this.prev.bind(this);
     this.selectAlbum = this.selectAlbum.bind(this);
     this.deselectAlbum = this.deselectAlbum.bind(this);
-    this.selectArtist = this.selectArtist.bind(this);
+    this.selectedArtistFunc = this.selectedArtistFunc.bind(this);
+    this.selectedArtistAlbums = this.selectedArtistAlbums.bind(this);
   }
 
   componentDidMount () {
@@ -36,7 +37,6 @@ export default class AppContainer extends Component {
       .then(artistsFromServer => {
         this.setState({artists: artistsFromServer})
       })
-
 
     AUDIO.addEventListener('ended', () =>
       this.next());
@@ -110,13 +110,28 @@ export default class AppContainer extends Component {
     this.setState({ selectedAlbum: {}});
   }
 
-  selectArtist (artistId) {
-    axios.get(`/api/albums/${artistId}`)
+  selectedArtistFunc (artistId) {
+    axios.get(`/api/artists/${artistId}`)
       .then(res => res.data)
       .then(artist => this.setState({
         selectedArtist: artist
       }));
   }
+
+  selectedArtistAlbums (artistId) {
+    axios.get(`/api/artists/${artistId}/albums`)
+      .then(res => res.data)
+      .then(albums => {
+        albums.imageUrl = `/api/albums/${album.id}/image`;
+        console.log(albums);
+        // console.log(this);
+        // this.setState({
+        // selectArtistAlbums: albums
+      // })
+    })
+  }
+
+
 
   render () {
     return (
@@ -130,7 +145,9 @@ export default class AppContainer extends Component {
           React.cloneElement(this.props.children, {
             artists: this.state.artists,
             selectedArtist: this.state.selectedArtist,
-
+            selectedArtistFunc: this.selectedArtistFunc,
+            selectedArtistAlbums: this.selectedArtistAlbums,
+            selectArtistAlbums: this.state.selectArtistAlbums,
             album: this.state.selectedAlbum,
             currentSong: this.state.currentSong,
             isPlaying: this.state.isPlaying,
